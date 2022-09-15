@@ -92,7 +92,7 @@ int main(){
             std::cin.clear();
             std::cin.ignore(INT_MAX, '\n');
             std::cout<<"Id currently used compressor station: "<<CSId<<std::endl;
-            std::cout<<std::endl;
+            std::cout<<std::endl; 
 
         } else if (option == 3){
     //Showing all existing objects -----------------------------------------------------
