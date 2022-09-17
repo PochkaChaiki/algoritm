@@ -7,7 +7,6 @@
 
 #define INT_TYPE (int)1
 #define DOUBLE_TYPE (double)1.0
-// #define UNSIGNED_INT_TYPE (unsigned int)1
 
 
 struct Pipe {
@@ -19,7 +18,7 @@ struct Pipe {
 
 struct CompressorStation {
     unsigned int ID;
-    double efficiency;
+    double efficiency = 0;
     int shopsAmount = 0;
     std::vector<int> shops;
 };
@@ -30,11 +29,10 @@ T checkInput(std::istream& in, T checkingValue){
     in >> input;
     std::stringstream inputStream(input);
     if (in.fail() || !(inputStream >> checkingValue) || !inputStream.eof()){
-            std::cout<<"Input error. Try again."<<std::endl;
+            std::cout<<"INPUT ERROR: Invalid value. Try again."<<std::endl;
             in.clear();
             in.ignore(INT_MAX, '\n');
             system("pause");
-            // system("CLS");
             return -1;
     } else {
         return checkingValue;
@@ -65,7 +63,6 @@ void showObjects(std::vector<Pipe>& pipeline, std::vector<CompressorStation>& co
         std::cout<<std::endl;
         std::cout<<"=...=...=...=...=...=...=...=...=...=...=...=...=...=...="<<std::endl;
     }
-    system("pause");
 }
 
 int addPipe(std::vector<Pipe>& pipeline, double length, double diameter, bool status){
@@ -88,6 +85,7 @@ void editPipe(Pipe& pipe, int option){
         std::cout<<"Length value: "<<pipe.length<<std::endl<<"Enter new value: ";
         double lengthInput = checkInput(std::cin, DOUBLE_TYPE);
         pipe.length = (lengthInput <= -1) ? pipe.length : lengthInput;
+
     } else if (option == 3){
         std::cout<<"Diameter value: "<<pipe.diameter<<std::endl<<"Enter new value: ";
         double diameterInput = checkInput(std::cin, DOUBLE_TYPE);
@@ -100,9 +98,11 @@ void editCompressorStation(CompressorStation& station, int option){
         std::cout<<"Shops amount value: "<<station.shopsAmount<<std::endl<<"Enter new value: ";
         int shopsAmountInput = checkInput(std::cin, INT_TYPE);
         station.shopsAmount = (shopsAmountInput <= -1) ? station.shopsAmount : shopsAmountInput;
+
         if (station.shops.size() < station.shopsAmount){
             for (int j(0); j < station.shopsAmount - station.shops.size(); ++j)
                 station.shops.push_back(0);
+
         } else if (station.shops.size() > station.shopsAmount){
             for (int j(0); j < station.shops.size() - station.shopsAmount; ++j)
                 station.shops.pop_back();
@@ -113,8 +113,10 @@ void editCompressorStation(CompressorStation& station, int option){
         std::cout<<"Shops statuses: "<<std::endl;
         for (auto i: station.shops)
             std::cout<<i<<" ";
+
         std::cout<<"Enter new shops statuses (\"1\" if it's \"in work\", and \"0\" if it is not (REMINDER: if you pass amount of statuses that is more than you wrote step back, extra statuses won't be passed)): "<<std::endl;
-        station.shops.clear();
+        station.shops.clear(); 
+
         for (int i(0); i<station.shopsAmount; ++i){
                 int status = checkInput(std::cin, INT_TYPE);
                 status = (status > 1) ? 1 : status;
@@ -133,15 +135,106 @@ void editCompressorStation(CompressorStation& station, int option){
 
 void saveCompany(std::vector <Pipe>& pipeline, std::vector <CompressorStation>& company, std::string filename){
     std::ofstream fout(filename, std::ios::out);
-    fout<<"Pipes:"<<std::endl;
-    for (auto pipe: pipeline)
-        fout<<pipe.ID<<","<<pipe.status<<","<<pipe.length<<","<<pipe.diameter<<std::endl;
-    fout<<"Stations:"<<std::endl;
-    for (auto station: company){
-        fout<<station.ID<<","<<station.efficiency<<","<<station.shopsAmount;
-        for (auto shop: station.shops)
-            fout<<","<<shop;
-        fout<<std::endl;
+    if (fout){
+        fout<<"Pipes: "<<pipeline.size()<<std::endl;
+        for (auto pipe: pipeline)
+            fout<<pipe.ID<<" "<<pipe.status<<" "<<pipe.length<<" "<<pipe.diameter<<std::endl;
+
+        fout<<"Stations: "<<company.size();
+        for (auto station: company){
+            fout<<std::endl;
+            fout<<station.ID<<" "<<station.efficiency<<" "<<station.shopsAmount;
+            for (auto shop: station.shops)
+                fout<<" "<<shop;
+        }
+
+        fout.close();
+    } else {
+        std::cout<<"WRITE ERROR: Failed to open file."<<std::endl;
     }
-    fout.close();
+}
+
+void loadCompany(std::vector <Pipe>& pipeline, std::vector <CompressorStation>& company, std::string filename){
+    std::ifstream fin(filename, std::ios::in);
+    if (fin){
+        pipeline.clear();
+        company.clear();
+        std::string input;
+        int amount;
+        while(!fin.eof()){
+            std::getline(fin, input, ' ');
+            fin >> amount;
+            if (input == "Pipes:"){
+                std::cout<<"Reading info about pipes"<<std::endl;
+                for (int j(0); j<amount; ++j){
+                    int pipeID = checkInput(fin, INT_TYPE);
+                    if (pipeID == -1){
+                        std::cout<<"INPUT PIPEID ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    int status = checkInput(fin, INT_TYPE);
+                    if (status == -1){
+                        std::cout<<"INPUT STATUS ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    double length = checkInput(fin, DOUBLE_TYPE);
+                    if (length == -1){
+                        std::cout<<"INPUT LENGTH ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    double diameter = checkInput(fin, DOUBLE_TYPE);
+                    if (diameter == -1){
+                        std::cout<<"INPUT DIAMETER ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    pipeline.push_back({(unsigned int)pipeID, (bool)status, length, diameter});
+                }
+                std::getline(fin, input, '\n');
+            } else if (input == "Stations:"){
+                std::cout<<"Reading info about stations"<<std::endl;
+                for (int j(0); j<amount; ++j){
+                    int CSID = checkInput(fin, INT_TYPE);
+                    if (CSID == -1){
+                        std::cout<<"INPUT COMPRESSOR STATION ID ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    double efficiency = checkInput(fin, DOUBLE_TYPE);
+                    if (efficiency == -1){
+                        std::cout<<"INPUT EFFICIENCY ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    int shopsAmount = checkInput(fin, INT_TYPE);
+                    if (shopsAmount == -1){
+                        std::cout<<"INPUT SHOPS AMOUNT ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                        continue;
+                    }
+                    std::vector <int> shops;
+                    for (int k(0); k<shopsAmount; ++k){
+                        int status = checkInput(fin, INT_TYPE);
+                        status = (status > 1) ? 1 : status;
+                        if (status > -1)
+                            shops.push_back(status);
+                        else if (status == -1){
+                            std::cout<<"INPUT SHOPS' STATUSES ERROR: Line number "<<j+1<<" is damaged. Failed to input, so it missed."<<std::endl;
+                            shops.clear();
+                            break;
+                        } else
+                            shops.push_back(0);
+                    }
+                    if (shops.size() == 0)
+                        continue;
+                    company.push_back({(unsigned int)CSID, efficiency, shopsAmount, shops});
+                }
+                std::getline(fin, input, '\n');
+            } else {
+                std::cout<<"READ ERROR: Failed to read file. File is damaged."<<std::endl;
+                fin.clear();
+                fin.ignore(INT_MAX, '\n');
+                fin.close();
+                system("pause");
+            }
+        }
+    } else {
+        std::cout<<"READ ERROR: Failed to open file."<<std::endl;
+    }
 }

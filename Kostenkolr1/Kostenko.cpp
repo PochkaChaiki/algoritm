@@ -21,7 +21,7 @@ int main(){
         if (option == -1)
             continue;
         if (option > 7){
-            std::cout<<"Input error. Try again."<<std::endl;
+            std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
             std::cin.clear();
             std::cin.ignore(INT_MAX, '\n');
             option = -1;
@@ -42,7 +42,7 @@ int main(){
             if (diameter == -1)
                 continue;
             int status = checkInput(std::cin, INT_TYPE);
-            // std::cin>>length>>diameter>>status;
+            
             if (status == -1)
                 continue;
 
@@ -60,6 +60,9 @@ int main(){
             shopsAmount = checkInput(std::cin, INT_TYPE);
             if (shopsAmount == -1)
                 continue;
+            if (shopsAmount == 0){
+                std::cout<<"INPUT ERROR: Shops amount can't be 0. Try again."<<std::endl;
+            }
             std::cout<<"Input compressor station each shop's status - \"1\" if it's \"in work\", and \"0\" if it is not (REMINDER: if you pass amount of statuses that is more than you wrote step back, extra statuses won't be passed): ";
             for (int i(0); i<shopsAmount; ++i){
                 int status = checkInput(std::cin, INT_TYPE);
@@ -88,7 +91,7 @@ int main(){
         } else if (option == 4){
     //Editing pipes -----------------------------------------------------------------------------------------------------------------------
             if (myPipeline.size() == 0){
-                std::cout<<"Error: There're no pipes in your pipeline. Add one and try again."<<std::endl;
+                std::cout<<"EDIT ERROR: There're no pipes in your pipeline. Add one and try again."<<std::endl;
                 system("pause");
                 system("CLS");
                 continue;
@@ -96,7 +99,7 @@ int main(){
             std::cout<<"Enter ID of the pipe you want to edit: "<<std::endl;
             pipeID = checkInput(std::cin, INT_TYPE);
             if (pipeID > myPipeline.size() - 1){
-                std::cout<<"Error: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
+                std::cout<<"EDIT ERROR: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
                 system("pause");
                 system("CLS");
                 continue;
@@ -111,7 +114,7 @@ int main(){
                 if (suboption == -1)
                     continue;
                 if (suboption > 3){
-                    std::cout<<"Input error. Try again."<<std::endl;
+                    std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
                     std::cin.clear();
                     std::cin.ignore(INT_MAX, '\n');
                     suboption = -1;
@@ -119,21 +122,21 @@ int main(){
                     continue;
                 }
                 editPipe(myPipeline[pipeID], suboption);
-                system("pause");
-                system("CLS");
+                
             }
         } else if (option == 5){
+    //Editing compressor stations ------------------------------------------------------------------------------------------------------------------
             if (myGasCompany.size() == 0){
-                std::cout<<"Error: There're no pipes in your pipeline. Add one and try again."<<std::endl;
+                std::cout<<"EDIT ERROR: There're no compressor stations in your gas company. Add one and try again."<<std::endl;
                 system("pause");
                 system("CLS");
                 continue;
             }
             std::cout<<"Enter ID of the compressor station you want to edit: "<<std::endl;
             CSID = checkInput(std::cin, INT_TYPE);
-            std::cout<<"CSID: "<<CSID<<std::endl;
+
             if ((CSID > myGasCompany.size() - 1)){
-                std::cout<<"Error: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
+                std::cout<<"EDIT ERROR: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
                 system("pause");
                 system("CLS");
                 continue;
@@ -148,7 +151,7 @@ int main(){
                 if (suboption == -1)
                     continue;
                 if (suboption > 2){
-                    std::cout<<"Input error. Try again."<<std::endl;
+                    std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
                     std::cin.clear();
                     std::cin.ignore(INT_MAX, '\n');
                     suboption = -1;
@@ -156,13 +159,20 @@ int main(){
                     continue;
                 }
                 editCompressorStation(myGasCompany[CSID], suboption);
-                system("pause");
-                system("CLS");
             }
         } else if (option == 6){
-            saveCompany(myPipeline, myGasCompany, "test.save");
+    //Saving company to file ---------------------------------------------------------------------------------------------------------------------------
+            std::string filename;
+            std::cout<<"Enter filename (use .save): ";
+            std::cin>>filename;
+            saveCompany(myPipeline, myGasCompany, filename);
+        } else if (option == 7){
+    //Loading company from file ------------------------------------------------------------------------------------------------------------------------
+            std::string filename;
+            std::cout<<"Enter filename (use .save): ";
+            std::cin>> filename;
+            loadCompany(myPipeline, myGasCompany, filename);
         }
-
         system("pause");
         system("CLS");
     }
