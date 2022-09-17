@@ -107,6 +107,7 @@ void editCompressorStation(CompressorStation& station, int option){
             for (int j(0); j < station.shops.size() - station.shopsAmount; ++j)
                 station.shops.pop_back();
         }
+        station.efficiency = (double)std::count(station.shops.begin(), station.shops.end(), 1) / station.shopsAmount;
 
     } else if (option == 2){
         std::cout<<"Shops statuses: "<<std::endl;
@@ -125,7 +126,22 @@ void editCompressorStation(CompressorStation& station, int option){
                 }else
                     station.shops.push_back(0);
             }
+        station.efficiency = (double)std::count(station.shops.begin(), station.shops.end(), 1) / station.shopsAmount;
     }
 
 }
 
+void saveCompany(std::vector <Pipe>& pipeline, std::vector <CompressorStation>& company, std::string filename){
+    std::ofstream fout(filename, std::ios::out);
+    fout<<"Pipes:"<<std::endl;
+    for (auto pipe: pipeline)
+        fout<<pipe.ID<<","<<pipe.status<<","<<pipe.length<<","<<pipe.diameter<<std::endl;
+    fout<<"Stations:"<<std::endl;
+    for (auto station: company){
+        fout<<station.ID<<","<<station.efficiency<<","<<station.shopsAmount;
+        for (auto shop: station.shops)
+            fout<<","<<shop;
+        fout<<std::endl;
+    }
+    fout.close();
+}

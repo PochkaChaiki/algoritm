@@ -160,7 +160,7 @@ int main(){
                 system("CLS");
             }
         } else if (option == 6){
-
+            saveCompany(myPipeline, myGasCompany, "test.save");
         }
 
         system("pause");
