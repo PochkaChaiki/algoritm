@@ -41,7 +41,7 @@ void CompressorStation::InputCompressorStation(){
             } else 
                 shops.push_back(status);
         }
-        
+
         std::cin.clear();
         std::cin.ignore(INT_MAX, '\n');
         efficiency = (double)std::count(shops.begin(), shops.end(), 1) / shopsAmount;
@@ -91,7 +91,7 @@ void CompressorStation::SaveCompressorStation(std::ofstream& fout){
         fout<<" "<<shop;
 }
 
-void CompressorStation::LoadCompressorStation(std::ifstream& fin, bool inputStatus){
+void CompressorStation::LoadCompressorStation(std::ifstream& fin, bool& inputStatus){
     std::cout<<"Reading info about stations"<<std::endl;
     ID = checkInput(fin, INT_TYPE);
     fin >> stationName;

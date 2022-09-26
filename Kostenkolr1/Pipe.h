@@ -20,10 +20,8 @@ struct Pipe{
     
     void SavePipe(std::ofstream& fout);
     
-    void LoadPipe(std::ifstream& fin, bool inputStatus);
+    void LoadPipe(std::ifstream& fin, bool& inputStatus);
 };
-
-
 
 int addPipe(std::map <int, Pipe>& pipeline, Pipe& pipe);
 

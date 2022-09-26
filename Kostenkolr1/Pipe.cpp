@@ -55,7 +55,7 @@ void Pipe::SavePipe(std::ofstream& fout){
     fout<<ID<<" "<<status<<" "<<length<<" "<<diameter<<std::endl;
 }
 
-void Pipe::LoadPipe(std::ifstream& fin, bool inputStatus){
+void Pipe::LoadPipe(std::ifstream& fin, bool& inputStatus){
     std::cout<<"Reading info about pipes"<<std::endl;
     ID = checkInput(fin, INT_TYPE);
     status = checkInput(fin, INT_TYPE);

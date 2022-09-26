@@ -23,7 +23,7 @@ struct CompressorStation{
 
     void SaveCompressorStation(std::ofstream& fout);
     
-    void LoadCompressorStation(std::ifstream& fin, bool inputStatus);
+    void LoadCompressorStation(std::ifstream& fin, bool& inputStatus);
 };
 
 int addCompressorStation(std::map<int, CompressorStation>& company, CompressorStation& CS);
