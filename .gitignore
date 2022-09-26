@@ -1,3 +1,5 @@
 /.vscode
-.exe
-/test.cpp
+*.exe
+/fuck
+*.o
+*.save

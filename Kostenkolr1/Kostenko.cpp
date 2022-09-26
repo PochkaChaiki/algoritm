@@ -1,17 +1,24 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
+#include <map>
 #include <bits/stdc++.h>
+#include "Pipe.h"
+#include "CompressorStation.h"
 #include "company.h"
 
+void showObjects(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company);
+
+void loadCompany(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company, std::string filename);
+
+void saveCompany(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company, std::string filename);
 
 int main(){
     int option(-1), pipeID, CSID;
-    std::vector<Pipe> myPipeline;
-    std::vector<CompressorStation> myGasCompany;
 
+    std::map <int, Pipe> myPipeline;
+    std::map <int, CompressorStation> myStations;
+    std::cout<<"#---------------------------------------------#"<<std::endl;
     std::cout<<"Create your own gas producing company"<<std::endl;
     std::cout<<"#---------------------------------------------#"<<std::endl;
 
@@ -25,156 +32,160 @@ int main(){
             std::cin.clear();
             std::cin.ignore(INT_MAX, '\n');
             option = -1;
-            system("pause");
-            system("CLS");
             continue;
         }
         
 // Checking option ------------------------------------------------------------------------------------------------------------------------
-
         if (option == 1){
     //Adding pipe ------------------------------------------------------------------
-            std::cout<<"Input pipe\'s parameteres (length, diameter, status): ";
-            double length = checkInput(std::cin, DOUBLE_TYPE);
-            if (length == -1)
-                continue;
-            double diameter = checkInput(std::cin, DOUBLE_TYPE);
-            if (diameter == -1)
-                continue;
-            int status = checkInput(std::cin, INT_TYPE);
+            Pipe pipe;
             
-            if (status == -1)
-                continue;
-
-            pipeID = addPipe(myPipeline, length, diameter, status);
+            pipe.InputPipe();
+            pipeID = addPipe(myPipeline, pipe);
 
             std::cout<<"Id currently used pipe: "<<pipeID<<std::endl;
             std::cout<<std::endl;
 
         } else if (option == 2){
     //Adding compressor station ------------------------------------------------------
-            int shopsAmount;
-            std::vector<int> shops;
-    
-            std::cout<<"Input compressor station shops' amount: ";
-            shopsAmount = checkInput(std::cin, INT_TYPE);
-            if (shopsAmount == -1)
-                continue;
-            if (shopsAmount == 0){
-                std::cout<<"INPUT ERROR: Shops amount can't be 0. Try again."<<std::endl;
-            }
-            std::cout<<"Input compressor station each shop's status - \"1\" if it's \"in work\", and \"0\" if it is not (REMINDER: if you pass amount of statuses that is more than you wrote step back, extra statuses won't be passed): ";
-            for (int i(0); i<shopsAmount; ++i){
-                int status = checkInput(std::cin, INT_TYPE);
-                status = (status > 1) ? 1 : status;
-                if (status > -1)
-                    shops.push_back(status);
-                else if (status == -1){
-                    i--;
-                    continue;
-                }else
-                    shops.push_back(0);
-            }
+            CompressorStation CS;
 
-            CSID = addCompressorStation(myGasCompany, shopsAmount, shops);
-            myGasCompany[CSID].efficiency = (double)std::count(shops.begin(), shops.end(), 1) / shopsAmount;
+            CS.InputCompressorStation();
+            CSID = addCompressorStation(myStations, CS);
 
-            std::cin.clear();
-            std::cin.ignore(INT_MAX, '\n');
             std::cout<<"Id currently used compressor station: "<<CSID<<std::endl;
             std::cout<<std::endl; 
 
         } else if (option == 3){
     //Showing all existing objects -----------------------------------------------------
-            showObjects(myPipeline, myGasCompany);
+            showObjects(myPipeline, myStations);
 
         } else if (option == 4){
     //Editing pipes -----------------------------------------------------------------------------------------------------------------------
             if (myPipeline.size() == 0){
                 std::cout<<"EDIT ERROR: There're no pipes in your pipeline. Add one and try again."<<std::endl;
-                system("pause");
-                system("CLS");
                 continue;
             }
             std::cout<<"Enter ID of the pipe you want to edit: "<<std::endl;
             pipeID = checkInput(std::cin, INT_TYPE);
             if (pipeID > myPipeline.size() - 1){
                 std::cout<<"EDIT ERROR: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
-                system("pause");
-                system("CLS");
                 continue;
             }
             if (pipeID == -1){
+                std::cout<<"EDIT ERROR: ID input is invalid. Try again."<<std::endl;
                 continue;
             }
-            int suboption(-1);
-            while (suboption){
-                std::cout<<"Choose parameter you want to edit:\n1. Edit status;\n2. Edit length;\n3. Edit diameter;\n0. Quit editting mode"<<std::endl;
-                suboption = checkInput(std::cin, INT_TYPE);
-                if (suboption == -1)
-                    continue;
-                if (suboption > 3){
-                    std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
-                    std::cin.clear();
-                    std::cin.ignore(INT_MAX, '\n');
-                    suboption = -1;
-                    system("pause");
-                    continue;
-                }
-                editPipe(myPipeline[pipeID], suboption);
-                
-            }
+            myPipeline[pipeID].EditPipe();
+
         } else if (option == 5){
     //Editing compressor stations ------------------------------------------------------------------------------------------------------------------
-            if (myGasCompany.size() == 0){
-                std::cout<<"EDIT ERROR: There're no compressor stations in your gas company. Add one and try again."<<std::endl;
-                system("pause");
-                system("CLS");
+            if (myStations.size() == 0){
+                std::cout<<"EDIT ERROR: There're no compressor stations in your stations list. Add one and try again."<<std::endl;
                 continue;
             }
             std::cout<<"Enter ID of the compressor station you want to edit: "<<std::endl;
             CSID = checkInput(std::cin, INT_TYPE);
 
-            if ((CSID > myGasCompany.size() - 1)){
-                std::cout<<"EDIT ERROR: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
-                system("pause");
-                system("CLS");
+            if ((CSID > myStations.size() - 1)){
+                std::cout<<"EDIT ERROR: There's no compressor station with this ID in your stations list. Try again."<<std::endl;
                 continue;
             }
-            if (CSID == -1)
+            if (CSID == -1){
+                std::cout<<"EDIT ERROR: ID input is invalid. Try again."<<std::endl;
                 continue;
+            }
             
-            int suboption(-1);
-            while (suboption){
-                std::cout<<"Choose parameter you want to edit:\n1. Edit shops amount;\n2. Edit shops statuses;\n0. Quit editting mode"<<std::endl;
-                suboption = checkInput(std::cin, INT_TYPE);
-                if (suboption == -1)
-                    continue;
-                if (suboption > 2){
-                    std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
-                    std::cin.clear();
-                    std::cin.ignore(INT_MAX, '\n');
-                    suboption = -1;
-                    system("pause");
-                    continue;
-                }
-                editCompressorStation(myGasCompany[CSID], suboption);
-            }
+            myStations[CSID].EditCompressorStation();
+
         } else if (option == 6){
     //Saving company to file ---------------------------------------------------------------------------------------------------------------------------
             std::string filename;
             std::cout<<"Enter filename (use .save): ";
             std::cin>>filename;
-            saveCompany(myPipeline, myGasCompany, filename);
+            saveCompany(myPipeline, myStations, filename);
         } else if (option == 7){
     //Loading company from file ------------------------------------------------------------------------------------------------------------------------
             std::string filename;
             std::cout<<"Enter filename (use .save): ";
             std::cin>> filename;
-            loadCompany(myPipeline, myGasCompany, filename);
+            loadCompany(myPipeline, myStations, filename);
         }
-        system("pause");
-        system("CLS");
     }
     return 0;
 }
+
+void showObjects(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company){
+    std::cout<<"#--------------------------------------------------------#"<<std::endl;
+    for (auto pipe : pipeline){
+        pipe.second.ShowPipe();
+    }
+    std::cout<<"#--------------------------------------------------------#"<<std::endl;
+    for (auto station: company){
+        station.second.ShowCompressorStation();
+    }
+}
+
+void saveCompany(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company, std::string filename){
+    std::ofstream fout(filename, std::ios::out);
+    if (fout){
+        fout<<"Pipes: "<<pipeline.size()<<std::endl;
+        for (auto pipe: pipeline)
+            pipe.second.SavePipe(fout);
+
+        fout<<"Stations: "<<company.size();
+        for (auto station: company)
+            station.second.SaveCompressorStation(fout);
+
+        fout.close();
+    } else {
+        std::cout<<"WRITE ERROR: Failed to open file."<<std::endl;
+    }
+}
+
+void loadCompany(std::map <int, Pipe>& pipeline, std::map <int, CompressorStation>& company, std::string filename){
+    std::ifstream fin(filename, std::ios::in);
+    if (fin){
+        pipeline.clear();
+        company.clear();
+        std::string input;
+        int amount;
+        while(!fin.eof()){
+            std::getline(fin, input, ' ');
+            fin >> amount;
+            if (input == "Pipes:"){
+                for (int i(0); i<amount; ++i){
+                    Pipe pipe;
+                    bool flag(false);
+                    pipe.LoadPipe(fin, flag);
+                    if (flag){
+                        std::cout<<"FILE READ ERROR: Failed to read pipe's parameters due to file's damage."<<std::endl;
+                        continue;
+                    } else
+                        pipeline.insert({pipe.ID, pipe});
+                }
+                std::getline(fin, input, '\n');
+            }else if (input == "Stations:"){
+                for (int j(0); j<amount; ++j){
+                    CompressorStation CS;
+                    bool flag(false);
+                    CS.LoadCompressorStation(fin, flag);
+                    if (flag){
+                        std::cout<<"FILE READ ERROR: Failed to read compressor station's parameters due to file's damage."<<std::endl;
+                        continue;
+                    } else
+                        company.insert({CS.ID, CS});
+                }
+                std::getline(fin, input, '\n');
+            } else {
+                std::cout<<"READ ERROR: Failed to read file. File is damaged."<<std::endl;
+                fin.clear();
+                fin.ignore(INT_MAX, '\n');
+                fin.close();
+            }
+        }
+    } else {
+        std::cout<<"READ ERROR: Failed to open file."<<std::endl;
+    }
+}
+
