@@ -2,11 +2,12 @@
 #define CS_H
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <fstream>
 #include <string>
 
-struct CompressorStation{
+class CompressorStation{
+public:
     int ID;
     std::string stationName;
     double efficiency;
@@ -26,6 +27,8 @@ struct CompressorStation{
     void LoadCompressorStation(std::ifstream& fin, bool& inputStatus);
 };
 
-int addCompressorStation(std::map<int, CompressorStation>& company, CompressorStation& CS);
+int addCompressorStation(std::unordered_map<int, CompressorStation>& company, CompressorStation& CS);
+
+
 
 #endif

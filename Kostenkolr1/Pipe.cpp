@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include <bits/stdc++.h>
-#include "company.h"
+#include "utils.h"
 #include "Pipe.h"
 
 Pipe::Pipe(){
@@ -14,22 +14,16 @@ Pipe::Pipe(){
 
 void Pipe::InputPipe(){
     std::cout<<"Input pipe's length: ";
-    length = checkInput(std::cin, DOUBLE_TYPE);
-    while (length < 0){
+    while (!valueInput(std::cin, length) || (length < 0)){
         std::cout<<"INPUT PIPE LENGTH ERROR: Invalid value. Try again."<<std::endl;
-        length = checkInput(std::cin, DOUBLE_TYPE);
     }
     std::cout<<"Input pipe's diameter: ";   
-    diameter = checkInput(std::cin, DOUBLE_TYPE);
-    while (diameter < 0){
+    while (!valueInput(std::cin, diameter) || (diameter < 0)){
         std::cout<<"INPUT PIPE DIAMETER ERROR: Invalid value. Try again."<<std::endl;
-        diameter = checkInput(std::cin, DOUBLE_TYPE);
     }
     std::cout<<"Input pipe's status (\"1\" if pipe is \"In work\" and \"0\" pipe is \"Repairing\"): ";
-    status = checkInput(std::cin, INT_TYPE);
-    while ((status < 0) || (status > 1)){
+    while (!valueInput(std::cin, status) || (status < 0) || (status > 1)){
         std::cout<<"INPUT PIPE STATUS ERROR: Invalid value. Try again."<<std::endl;
-        status = checkInput(std::cin, INT_TYPE);
     }
 }
 
@@ -44,32 +38,23 @@ void Pipe::ShowPipe(){
 
 void Pipe::EditPipe(){
     std::cout<<"Status value: "<<status<<std::endl<<"Enter new value (\"0\" if pipe is \"Repairing\" and \"1\" if pipe is \"Is in work\"): ";
-    status = checkInput(std::cin, INT_TYPE);
-    while ((status < 0) || (status>1)){
+    while (!valueInput(std::cin, status) || (status < 0) || (status>1)){
         std::cout<<"INPUT PIPE STATUS ERROR: Invalid value. Try again."<<std::endl;
-        status = checkInput(std::cin, INT_TYPE);
     }
 }
 
 void Pipe::SavePipe(std::ofstream& fout){
-    fout<<ID<<" "<<status<<" "<<length<<" "<<diameter<<std::endl;
+    fout<<ID<<","<<status<<","<<length<<","<<diameter<<",";
 }
 
 void Pipe::LoadPipe(std::ifstream& fin, bool& inputStatus){
     std::cout<<"Reading info about pipes"<<std::endl;
-    ID = checkInput(fin, INT_TYPE);
-    status = checkInput(fin, INT_TYPE);
-    length = checkInput(fin, DOUBLE_TYPE);
-    diameter = checkInput(fin, DOUBLE_TYPE);
-    
-    if ((ID == -1) || (status == -1) || (length == -1) || (diameter == -1))
-        inputStatus = true;
-    else 
+    if (!valueInput(fin, ID, ',') || !valueInput(fin, status, ',') || !valueInput(fin, length, ',') || !valueInput(fin, diameter, ','))
         inputStatus = false;
 }
 
-int addPipe(std::map <int, Pipe>& pipeline, Pipe& pipe){
-    pipe.ID = pipeline.size();
+int addPipe(std::unordered_map <int, Pipe>& pipeline, Pipe& pipe){
+    pipe.ID = pipeline.size(); // need to find better way to id pipes --------------------!
     pipeline.insert({pipe.ID, pipe});
     return pipe.ID;
 }

@@ -1,10 +1,11 @@
 #ifndef PIPE_H
 #define PIPE_H
 
-#include <map>
+#include <unordered_map>
 #include <fstream>
 
-struct Pipe{
+class Pipe{
+public:
     int ID;
     int status;
     double length;
@@ -23,6 +24,6 @@ struct Pipe{
     void LoadPipe(std::ifstream& fin, bool& inputStatus);
 };
 
-int addPipe(std::map <int, Pipe>& pipeline, Pipe& pipe);
+int addPipe(std::unordered_map <int, Pipe>& pipeline, Pipe& pipe);
 
 #endif
