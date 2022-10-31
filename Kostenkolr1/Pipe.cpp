@@ -5,35 +5,53 @@
 #include "utils.h"
 #include "Pipe.h"
 
+int Pipe::Pipe_ID_counter = 0;
+
 Pipe::Pipe(){
-    ID = -1;
+    ID = Pipe_ID_counter++;
     length = 0;
     diameter = 0;
     status = 0;
 }
 
-void Pipe::InputPipe(){
+int Pipe::GetID(){return ID;}
+
+int Pipe::GetStatus(){return status;}
+
+void Pipe::SetStatus(int status){this->status = status;}
+
+//  User input pipe -------------------------------------------------------------------------------
+std::istream& operator>> (std::istream& in, Pipe& pipe){
+    in.clear();
+    in.ignore(INT_MAX, '\n');
+    std::cout<<"Input pipe's name: "<<std::endl;
+    std::getline(std::cin, pipe.name);
     std::cout<<"Input pipe's length: ";
-    while (!valueInput(std::cin, length) || (length < 0)){
+    while (!valueInput(in, pipe.length) || (pipe.length < 0)){
         std::cout<<"INPUT PIPE LENGTH ERROR: Invalid value. Try again."<<std::endl;
     }
     std::cout<<"Input pipe's diameter: ";   
-    while (!valueInput(std::cin, diameter) || (diameter < 0)){
+    while (!valueInput(in, pipe.diameter) || (pipe.diameter < 0)){
         std::cout<<"INPUT PIPE DIAMETER ERROR: Invalid value. Try again."<<std::endl;
     }
     std::cout<<"Input pipe's status (\"1\" if pipe is \"In work\" and \"0\" pipe is \"Repairing\"): ";
-    while (!valueInput(std::cin, status) || (status < 0) || (status > 1)){
+    while (!valueInput(in, pipe.status) || (pipe.status < 0) || (pipe.status > 1)){
         std::cout<<"INPUT PIPE STATUS ERROR: Invalid value. Try again."<<std::endl;
     }
+
+    return in;
 }
 
-void Pipe::ShowPipe(){
-    std::cout<<"Pipe parameteres: "<<std::endl;
-    std::cout<<"\tPipe ID: "<<ID<<std::endl;
-    std::cout<<"\tPipe's status: "<<(status?"In work":"Repairing")<<std::endl;
-    std::cout<<"\tPipe's length: "<<length<<std::endl;
-    std::cout<<"\tPipe's diameter: "<<diameter<<std::endl;
-    std::cout<<"=...=...=...=...=...=...=...=...=...=...=...=...=...=...="<<std::endl;
+//  Output pipe to user's screen ------------------------------------------------------------------
+std::ostream& operator<< (std::ostream& out, const Pipe& pipe){
+    out<<"Pipe parameteres: "<<std::endl;
+    out<<"\tPipe ID: "<<pipe.ID<<std::endl;
+    out<<"\tPipe name: "<<pipe.name<<std::endl;
+    out<<"\tPipe's status: "<<(pipe.status?"In work":"Repairing")<<std::endl;
+    out<<"\tPipe's length: "<<pipe.length<<std::endl;
+    out<<"\tPipe's diameter: "<<pipe.diameter<<std::endl;
+    out<<"=...=...=...=...=...=...=...=...=...=...=...=...=...=...="<<std::endl;
+    return out;
 }
 
 void Pipe::EditPipe(){
@@ -43,18 +61,25 @@ void Pipe::EditPipe(){
     }
 }
 
-void Pipe::SavePipe(std::ofstream& fout){
-    fout<<ID<<","<<status<<","<<length<<","<<diameter<<",";
+//  Saving pipe to a file -------------------------------------------------------------------------
+std::ofstream& operator<< (std::ofstream& fout, const Pipe& pipe){
+    fout<<pipe.ID<<","<<pipe.name<<","<<pipe.status<<","<<pipe.length<<","<<pipe.diameter<<",";
+    return fout;
 }
 
-void Pipe::LoadPipe(std::ifstream& fin, bool& inputStatus){
+//  Loading pipe from a file ----------------------------------------------------------------------
+std::ifstream& operator>> (std::ifstream& fin, Pipe& pipe){
     std::cout<<"Reading info about pipes"<<std::endl;
-    if (!valueInput(fin, ID, ',') || !valueInput(fin, status, ',') || !valueInput(fin, length, ',') || !valueInput(fin, diameter, ','))
-        inputStatus = false;
+    if (!valueInput(fin, pipe.ID, ',')){
+        fin.setstate(std::ios::failbit);
+        return fin;
+    }
+
+    std::getline(fin, pipe.name, ',');
+
+    if (!valueInput(fin, pipe.status, ',') || !valueInput(fin, pipe.length, ',') || !valueInput(fin, pipe.diameter, ',')){
+        fin.setstate(std::ios::failbit);
+    }
+    return fin;
 }
 
-int addPipe(std::unordered_map <int, Pipe>& pipeline, Pipe& pipe){
-    pipe.ID = pipeline.size(); // need to find better way to id pipes --------------------!
-    pipeline.insert({pipe.ID, pipe});
-    return pipe.ID;
-}

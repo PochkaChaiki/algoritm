@@ -5,30 +5,39 @@
 #include <unordered_map>
 #include <fstream>
 #include <string>
+#include <bits/stdc++.h>
 
 class CompressorStation{
 public:
-    int ID;
-    std::string stationName;
-    double efficiency;
-    int shopsAmount;
-    std::vector<int> shops;
+    static int CS_ID_counter;
+
+    std::string name;
 
     CompressorStation();
+    ~CompressorStation() = default;
 
-    void InputCompressorStation();
+//  User input compressor station
+    friend std::istream& operator>> (std::istream& in, CompressorStation& CS);
 
-    void ShowCompressorStation();
+//  Output compressor station to user's screen
+    friend std::ostream& operator<< (std::ostream& out, const CompressorStation& CS);
 
     void EditCompressorStation();
 
-    void SaveCompressorStation(std::ofstream& fout);
+//  Saving compressor station to a file
+    friend std::ofstream& operator<< (std::ofstream& fout, const CompressorStation& CS);
     
-    void LoadCompressorStation(std::ifstream& fin, bool& inputStatus);
+//  Loading compressor station from a file
+    friend std::ifstream& operator>> (std::ifstream& fin, CompressorStation& CS);
+
+    int GetID();
+    
+    double GetFreeShops(); 
+
+private:
+    int ID;
+    double efficiency;
+    std::vector<int> shops;
 };
-
-int addCompressorStation(std::unordered_map<int, CompressorStation>& company, CompressorStation& CS);
-
-
 
 #endif
