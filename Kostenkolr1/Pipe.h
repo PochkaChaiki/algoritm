@@ -2,13 +2,14 @@
 #define PIPE_H
 
 #include <unordered_map>
+#include <unordered_set>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 class Pipe{
 public:
-    static int Pipe_ID_counter;
+    static int ID_counter;
 
     std::string name;
 
@@ -20,8 +21,6 @@ public:
 
 //  Output pipe to user's screen
     friend std::ostream& operator<< (std::ostream& out, const Pipe& pipe);
-    
-    void EditPipe();
 
 //  Saving pipe to a file
     friend std::ofstream& operator<< (std::ofstream& fout, const Pipe& pipe);
@@ -35,11 +34,16 @@ public:
 
     void SetStatus(int status);
     
+    void EditPipe();   
 private:
     int ID;
     int status;
     double length;
     double diameter; 
 };
+
+bool checkParam(Pipe& pipe, int param);
+
+void searchObjects(std::unordered_map<int, Pipe>& objects, std::unordered_set<int>& searchResultSet);
 
 #endif

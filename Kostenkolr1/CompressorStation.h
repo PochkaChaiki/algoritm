@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <fstream>
 #include <string>
 #include <bits/stdc++.h>
 
 class CompressorStation{
 public:
-    static int CS_ID_counter;
+    static int ID_counter;
 
     std::string name;
 
@@ -39,5 +40,9 @@ private:
     double efficiency;
     std::vector<int> shops;
 };
+
+bool checkParam(CompressorStation& CS, double param);
+
+void searchObjects(std::unordered_map<int, CompressorStation>& objects, std::unordered_set<int>& searchResultSet);
 
 #endif

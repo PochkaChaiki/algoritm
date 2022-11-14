@@ -13,13 +13,81 @@ void loadCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <i
 
 void saveCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <int, CompressorStation>& company, std::string filename);
 
-bool checkStatus(Pipe& pipe, int status) {return (pipe.GetStatus() == status);}
+// template <typename T>
+// void searchObjects(std::unordered_map<int, T>& objects, std::unordered_set<int>& searchResultSet){
+//     // param - is actually utilitary thing. It is used to assign data type to search pipes.
+//     int searchChoice;
+//     std::cout<<"Choose search type by (type \"0\" to search by names or \"1\" to search by " << (std::is_same_v<T, Pipe> ? "status): " : "unused shops percentage): ");
+//     searchChoice = GetRightValue(std::cin, 0, 1);
+//     if (searchChoice == 0) {
+//         std::string nameToSearch;
+//         std::cout<<"Input keywords to search by: ";
+//         std::cin.clear();
+//         std::cin.ignore(INT_MAX, '\n');
+//         std::getline(std::cin, nameToSearch);
+//         searchResultSet = findObjectByParam(objects, checkName, nameToSearch);
+//     } else if (searchChoice == 1) {
+//         // auto p = (double)0;
+//         std::cout << (std::is_same_v<T, Pipe> ? " Input status to search by (\"0\" for repairing pipes, \"1\" for working pipes): " : "Input unused shops percentage to search by (in fractions of a unit): ");
+//         //Checks what is the object's type and according to this information passes right parameteres
+//         decltype(std::is_same_v<T, Pipe> ? (int)0: (double)0) param = GetRightValue<decltype(param)>(std::cin, 0, 1);
+//         searchResultSet = findObjectByParam(objects, checkParam, param);
+//     }
+// }
 
-bool checkUnusedShops(CompressorStation& CS, double param) {return (CS.GetFreeShops() >= param);}
+void chooseIdentifiers(std::unordered_set<int>& idSet){
+    std::unordered_set<int> userIdentifiers;
+    int objectsAmount;
+    std::cout<<"Enter amount of objects you want to edit: ";
+    objectsAmount = GetRightValue(std::cin, 0, (int)idSet.size());
 
-void searchPipes(std::unordered_map<int, Pipe>& pipeline, std::vector<int>& searchResultVector);
+    std::cout<<"Enter pipes' identifiers: ";
+    for (int i(0); i < objectsAmount; ++i){
+        int ID = GetRightValue(std::cin, 0, INT_MAX);
+        while (idSet.find(ID) == idSet.end()){
+            std::cout << "EDIT ERROR: Input error. Try again." << std::endl;
+            ID = GetRightValue(std::cin, 0, INT_MAX);
+        }
+        userIdentifiers.insert(ID);
+    }
+    idSet = userIdentifiers;
+}
 
-void searchCompressorStations(std::unordered_map<int, CompressorStation>& stations, std::vector<int>& searchResultVector);
+template <typename T>
+void getObjectsToEdit(std::unordered_map<int, T>& objects, std::unordered_set<int>& searchResultSet){
+    std::cout<<"Type \"0\" if you want to edit single object or \"1\" if you want to edit multiplicity of objects: "<<std::endl;
+        int objectsAmount;
+        objectsAmount = GetRightValue(std::cin, 0, 1);
+    // Editing single object ------------------------------------------------------------------------------------------------------------------------------------    
+        if (objectsAmount == 0){
+            std::cout<<"Enter ID of the object you want to edit: "<<std::endl;
+            int ID = GetRightValue(std::cin, 0, T::ID_counter - 1);
+
+            while (objects.find(ID) == objects.end()){
+                std::cout<<"EDIT ERROR: There's no object with this ID in your objects group. Try again."<<std::endl;
+                ID = GetRightValue(std::cin, 0, T::ID_counter - 1);
+            }
+            searchResultSet.insert(ID);
+            
+    // Editing multiple objects ---------------------------------------------------------------------------------------------------------------------------------
+        } else if (objectsAmount == 1){
+            searchObjects(objects, searchResultSet);
+            if (searchResultSet.size() != 0){
+                std::cout << "Found objects: " << std::endl;
+                for (auto id: searchResultSet)
+                    std::cout << objects[id] << std::endl;
+
+                std::cout << "Type \"0\" - to work with found objects, \"1\" - to choose objects to work with: ";
+                int choiceOption = GetRightValue(std::cin, 0, 1);
+
+                if (choiceOption == 1)
+                    chooseIdentifiers(searchResultSet);
+            } else {
+                std::cout << "No objects were found." << std::endl;
+            }
+        }
+}
+
 
 int main(){
     int option(-1), pipeID, CSID;
@@ -34,17 +102,7 @@ int main(){
         std::cout << "Choose menu's option:\n1.Add a pipe;\n2.Add a compressor station;\n3.Show all objects;\n4.Edit a pipe;"
                   << "\n5.Edit a compressor station;\n6.Save gas company;\n7.Load gas company;\n8.Find specific objects;\n0.Close program" << std::endl;
 
-        if (!valueInput(std::cin, option)){
-            std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-            continue;
-        }
-        if (option > 8){
-            std::cout<<"INPUT ERROR: Value is out of range. Try again."<<std::endl;
-            std::cin.clear();
-            std::cin.ignore(INT_MAX, '\n');
-            option = -1;
-            continue;
-        }
+        option = GetRightValue(std::cin, 0, 8);
         
 // Checking option ------------------------------------------------------------------------------------------------------------------------
         if (option == 1){
@@ -53,7 +111,7 @@ int main(){
             
             std::cin >> pipe;
             myPipeline.insert({pipe.GetID(), pipe});
-            std::cout<<"Id currently used pipe: "<<pipe.GetID()<<"\n\n";
+            std::cout << "Id currently used pipe: " << pipe.GetID() << "\n\n";
 
         } else if (option == 2){
     // Adding compressor station ------------------------------------------------------
@@ -61,7 +119,7 @@ int main(){
 
             std::cin >> CS;
             myStations.insert({CS.GetID(), CS});
-            std::cout<<"Id currently used compressor station: "<<CS.GetID()<<"\n\n";
+            std::cout << "Id currently used compressor station: " << CS.GetID() << "\n\n";
 
         } else if (option == 3){
     // Showing all existing objects -----------------------------------------------------
@@ -73,70 +131,20 @@ int main(){
                 std::cout<<"EDIT ERROR: There're no pipes in your pipeline. Add one and try again."<<std::endl;
                 continue;
             }
-            
-            std::cout<<"Type \"0\" if you want to edit single pipe or \"1\" if you want to edit multiplicity of pipes: "<<std::endl;
-            int objectsAmount;
-            while (!valueInput(std::cin, objectsAmount) || (objectsAmount < 0) || (objectsAmount > 1))
-                std::cout<<"EDIT ERROR: input is invalid. Try again."<<std::endl;
-        // Editing single pipe ------------------------------------------------------------------------------------------------------------------------------------    
-            if (objectsAmount == 0){
-                std::cout<<"Enter ID of the pipe you want to edit: "<<std::endl;
-                while(!valueInput(std::cin, pipeID))
-                    std::cout<<"EDIT ERROR: ID input is invalid. Try again."<<std::endl;
-
-                if (myPipeline.find(pipeID) == myPipeline.end()){
-                    std::cout<<"EDIT ERROR: There's no pipe with this ID in your pipeline. Try again."<<std::endl;
-                    continue;
+            std::unordered_set<int> searchResultSet;
+            getObjectsToEdit(myPipeline, searchResultSet);
+            int actionChoice;
+                std::cout<<"Select an action for the pipe (-s) (\"0\" - to edit the pipe (-s), \"1\" - to delete the pipe (-s)): "<<std::endl;
+                actionChoice = GetRightValue(std::cin, 0, 1);
+                if (actionChoice == 0){
+                    std::cout << "Enter status to set to pipes: ";
+                    int statusToSet = GetRightValue(std::cin, 0, 1);
+                    for (auto id: searchResultSet)
+                        myPipeline[id].SetStatus(statusToSet);
                 }
-                int actionChoice;
-                std::cout<<"Select an action for the pipe (\"0\" - to edit the pipe, \"1\" - to delete the pipe): "<<std::endl;
-                while (!valueInput(std::cin, actionChoice) || (actionChoice < 0) || (actionChoice > 1)){
-                    std::cout<<"EDIT ERROR: Invalid action selection input"<<std::endl;
-                }
-                if (actionChoice == 0)
-                    myPipeline[pipeID].EditPipe();
                 else if (actionChoice == 1)
-                    myPipeline.erase(myPipeline.find(pipeID));
-        // Editing multiple pipes --------------------------------------------------------------------------------------------------------------------------------
-            } else if (objectsAmount == 1){
-                int findOption;
-                std::cout<<"Select way to choose multiplicity of pipes (\"0\" - to find pipes with filter, \"1\" - to input pipes' identifiers by yourself): ";
-                while (!valueInput(std::cin, findOption) || (findOption < 0) || (findOption > 1)){
-                    std::cout<<"EDIT ERROR: Invalid input"<<std::endl;
-                }
-                
-                if (findOption == 0){
-                    std::vector<int> searchResultVector;
-                    searchPipes(myPipeline, searchResultVector);
-                    int statusToSet;
-                    std::cout<<"Enter status to set to the pipes (\"0\" - to set \"repairing\" status, \"1\" - to set \"working\" status): ";
-                    while(!valueInput(std::cin, statusToSet)|| (statusToSet < 0) || (statusToSet > 1))
-                        std::cout<<"EDIT ERROR: Invalid status input"<<std::endl;
-                    for (auto& id: searchResultVector)
-                        myPipeline[id].SetStatus(statusToSet);
-                    
-                } else if (findOption == 1){
-                    std::unordered_set<int> userIdentifiers;
-                    int pipesAmount;
-                    std::cout<<"Enter amount of pipes you want to edit: ";
-                    while(!valueInput(std::cin, pipesAmount) || (pipesAmount > Pipe::Pipe_ID_counter)){
-                        std::cout << "EDIT ERROR: Input error. Try again." << std::endl;
-                    }
-                    std::cout<<"Enter pipes' identifiers: ";
-                    for (int i(0); i < pipesAmount; ++i){
-                        while (!valueInput(std::cin, pipeID) || (pipeID < 0) || (pipeID > Pipe::Pipe_ID_counter) || (myPipeline.find(pipeID) == myPipeline.end()))
-                            std::cout << "EDIT ERROR: Input error. Try again." << std::endl;
-                        userIdentifiers.insert(pipeID);
-                    }
-                    std::cout << "Pipe's were found."<< std::endl;
-                    int statusToSet;
-                    std::cout<<"Enter status to set to the pipes (\"0\" - to set \"repairing\" status, \"1\" - to set \"working\" status): ";
-                    while (!valueInput(std::cin, statusToSet)|| (statusToSet < 0) || (statusToSet > 1))
-                        std::cout<<"EDIT ERROR: Invalid status input"<<std::endl;
-                    for (auto& id : userIdentifiers)
-                        myPipeline[id].SetStatus(statusToSet);
-                }
-            }
+                    for (auto id: searchResultSet)
+                        myPipeline.erase(myPipeline.find(id));
         } else if (option == 5){
     // Editing compressor stations ------------------------------------------------------------------------------------------------------------------
             if (myStations.size() == 0){
@@ -144,91 +152,47 @@ int main(){
                 continue;
             } 
             
-            std::cout<<"Type \"0\" if you want to edit single compressor station or \"1\" if you want to edit multiplicity of stations: "<<std::endl;
-            int objectsAmount;
-            while (!valueInput(std::cin, objectsAmount) || (objectsAmount < 0) || (objectsAmount > 1))
-                std::cout<<"EDIT ERROR: input is invalid. Try again."<<std::endl;
-        // Editing single compressor station --------------------------------------------------------------------------------------------------------------------   
-            if (objectsAmount == 0){
-                std::cout<<"Enter ID of the compressor station you want to edit: "<<std::endl;
-                while(!valueInput(std::cin, CSID))
-                    std::cout<<"EDIT ERROR: ID input is invalid. Try again."<<std::endl;
+            std::unordered_set<int> searchResultSet;
+            getObjectsToEdit(myStations, searchResultSet);
 
-                if ((myStations.find(CSID) == myStations.end())){
-                    std::cout<<"EDIT ERROR: There's no compressor station with this ID in your stations list. Try again."<<std::endl;
-                    continue;
-                } 
-                
-                int actionChoice;
-                std::cout<<"Select an action for the station (\"0\" - to edit the station, \"1\" - to delete the station): "<<std::endl;
-                while (!valueInput(std::cin, actionChoice) || (actionChoice < 0) || (actionChoice > 1)){
-                    std::cout<<"EDIT ERROR: Invalid action selection input"<<std::endl;
-                }
-
+            int actionChoice;
+                std::cout << "Select an action for the station (-s) (\"0\" - to edit the station (-s), \"1\" - to delete the station (-s)): " << std::endl;
+                actionChoice = GetRightValue(std::cin, 0, 1);
                 if (actionChoice == 0){
-                    myStations[CSID].EditCompressorStation();
-                } else if (actionChoice == 1) {
-                    myStations.erase(myStations.find(CSID));
-                }
-        // Editing multiple compressor stations --------------------------------------------------------------------------------------------------------------------           
-            } else if (objectsAmount == 1) {
-                int findOption;
-                std::cout<<"Select way to choose multiplicity of stations (\"0\" - to find stations with filter, \"1\" - to input stations' identifiers by yourself): ";
-                while (!valueInput(std::cin, findOption) || (findOption < 0) || (findOption > 1)){
-                    std::cout<<"EDIT ERROR: Invalid input"<<std::endl;
-                }
-                if (findOption == 0){
-                    std::vector<int> searchResultVector;
-                    searchCompressorStations(myStations, searchResultVector);
-                    for (auto& id: searchResultVector){
+                    for (auto id: searchResultSet)
                         myStations[id].EditCompressorStation();
-                    }
-                } else if (findOption == 1){
-                    std::unordered_set<int> userIdentifiers;
-                    int stationsAmount;
-                    std::cout<<"Enter amount of stations you want to edit: ";
-                    while(!valueInput(std::cin, stationsAmount) || (stationsAmount > CompressorStation::CS_ID_counter)){
-                        std::cout << "EDIT ERROR: Input error. Try again." << std::endl;
-                    }
-                    std::cout<<"Enter stations' identifiers: ";
-                    for (int i(0); i < stationsAmount; ++i){
-                        while (!valueInput(std::cin, CSID) || (CSID < 0) || (CSID > CompressorStation::CS_ID_counter) || (myStations.find(CSID) == myStations.end()))
-                            std::cout << "EDIT ERROR: ID input error. Try again." << std::endl;
-                        userIdentifiers.insert(CSID);
-                    }
-                    std::cout << "Compressor stations were found."<< std::endl;
-                    for (auto& id : userIdentifiers){
-                        std::cout<<"Compressor station's id: "<<id<<std::endl;
-                        myStations[id].EditCompressorStation();
-                    }
                 }
+                else if (actionChoice == 1)
+                    for (auto id: searchResultSet)
+                        myStations.erase(myStations.find(id));
 
-            }
         } else if (option == 6){
     // Saving company to file ---------------------------------------------------------------------------------------------------------------------------
             std::string filename;
             std::cout<<"Enter filename (use .save): ";
             std::cin>>filename;
             saveCompany(myPipeline, myStations, filename);
+
         } else if (option == 7){
     // Loading company from file ------------------------------------------------------------------------------------------------------------------------
             std::string filename;
             std::cout<<"Enter filename (use .save): ";
             std::cin>> filename;
             loadCompany(myPipeline, myStations, filename);
+
         } else if (option == 8){
     // Finding by filters -------------------------------------------------------------------------------------------------------------------------------
-            std::vector<int> searchResult;
+            std::unordered_set<int> searchResult;
             int choiceObject;
+
             std::cout<<"Choose object to use filter search on (type \"0\" for pipes or \"1\" for compressor stations): ";
-            if (!valueInput(std::cin, choiceObject) || (choiceObject < 0) || (choiceObject > 1))
-                std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-            else if (choiceObject == 0){
-                searchPipes(myPipeline, searchResult);
+            choiceObject = GetRightValue(std::cin, 0, 1);
+            if (choiceObject == 0){
+                searchObjects(myPipeline, searchResult);
                 for (auto obj: searchResult)
                     std::cout<<myPipeline[obj]<<std::endl;
             } else if (choiceObject == 1){
-                searchCompressorStations(myStations, searchResult);
+                searchObjects(myStations, searchResult);
                 for (auto obj: searchResult)
                     std::cout<<myStations[obj]<<std::endl;
             }
@@ -236,51 +200,6 @@ int main(){
         }
     }
     return 0;
-}
-
-void searchPipes(std::unordered_map<int, Pipe>& pipeline, std::vector<int>& searchResultVector){
-    int searchChoice;
-    std::cout<<"Choose parameter to search by (type \"0\" to search by names or \"1\" to search by status): ";
-    while (!valueInput(std::cin, searchChoice) || (searchChoice < 0) || (searchChoice > 1)){
-        std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-    }
-    if (searchChoice == 0) {
-        std::string nameToSearch;
-        std::cout<<"Input keywords to search by: ";
-        std::cin.clear();
-        std::cin.ignore(INT_MAX, '\n');
-        std::getline(std::cin, nameToSearch);
-        searchResultVector = findObjectByParam(pipeline, checkName, nameToSearch);
-    } else if (searchChoice == 1) {
-        int status;
-        std::cout<<"Input status to search by (\"0\" for repairing pipes, \"1\" for working pipes): ";
-        while (!valueInput(std::cin, status) || (status < 0) || (status > 1))
-            std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-
-        searchResultVector = findObjectByParam(pipeline, checkStatus, status);
-    }
-}
-
-void searchCompressorStations(std::unordered_map<int, CompressorStation>& stations, std::vector<int>& searchResultVector){
-    int searchChoice;
-    std::cout<<"Choose parameter to search by (type \"0\" to search by names or \"1\" to search by unused shops percentage: ";
-    if (!valueInput(std::cin, searchChoice) ||(searchChoice < 0) || (searchChoice > 1)){
-        std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-    }
-    if (searchChoice == 0) {
-        std::string nameToSearch;
-        std::cout<<"Input keywords to search by: ";
-        std::cin.clear();
-        std::cin.ignore(INT_MAX, '\n');
-        std::getline(std::cin, nameToSearch);
-        searchResultVector = findObjectByParam(stations, checkName, nameToSearch);
-    } else if (searchChoice == 1) {
-        double unusedPowerSupplies;
-        std::cout<<"Input unused shops percentage to search by (in fractions of a unit): ";
-        while (!valueInput(std::cin, unusedPowerSupplies) || (unusedPowerSupplies < 0) || (unusedPowerSupplies > 1))
-            std::cout<<"INPUT ERROR: Invalid input. Try again."<<std::endl;
-        searchResultVector = findObjectByParam(stations, checkUnusedShops, unusedPowerSupplies);
-    }
 }
 
 void showObjects(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <int, CompressorStation>& company){
@@ -314,8 +233,8 @@ void saveCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <i
 void loadCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <int, CompressorStation>& company, std::string filename){
     std::ifstream fin(filename, std::ios::in);
     if (fin){
-        Pipe::Pipe_ID_counter = 0;
-        CompressorStation::CS_ID_counter = 0;
+        Pipe::ID_counter = 0;
+        CompressorStation::ID_counter = 0;
         pipeline.clear();
         company.clear();
         std::string input;
@@ -332,7 +251,7 @@ void loadCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <i
                         continue;
                     } else
                         pipeline.insert({pipe.GetID(), pipe});
-                    Pipe::Pipe_ID_counter = ((Pipe::Pipe_ID_counter < pipe.GetID())? pipe.GetID() : Pipe::Pipe_ID_counter);
+                    Pipe::ID_counter = ((Pipe::ID_counter < pipe.GetID())? pipe.GetID() : Pipe::ID_counter);
                 }
             } else if (input == "Stations:"){
                 for (int j(0); j<amount; ++j){
@@ -343,8 +262,9 @@ void loadCompany(std::unordered_map <int, Pipe>& pipeline, std::unordered_map <i
                         continue;
                     } else
                         company.insert({CS.GetID(), CS});
-                    CompressorStation::CS_ID_counter = ((CompressorStation::CS_ID_counter < CS.GetID())? CS.GetID() : CompressorStation::CS_ID_counter);
+                    CompressorStation::ID_counter = ((CompressorStation::ID_counter < CS.GetID())? CS.GetID() : CompressorStation::ID_counter);
                 }
+                std::getline(fin, input, '\n');
             } else {
                 std::cout<<"READ ERROR: Failed to read file. File is damaged."<<std::endl;
                 fin.clear();
