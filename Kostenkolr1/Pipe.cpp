@@ -21,6 +21,8 @@ int Pipe::GetStatus(){return status;}
 
 void Pipe::SetStatus(int status){this->status = status;}
 
+double Pipe::GetDiameter(){return diameter;}
+
 //  User input pipe -------------------------------------------------------------------------------
 std::istream& operator>> (std::istream& in, Pipe& pipe){
     in.ignore(INT_MAX, '\n');
@@ -62,14 +64,14 @@ std::ofstream& operator<< (std::ofstream& fout, const Pipe& pipe){
 
 //  Loading pipe from a file ----------------------------------------------------------------------
 std::ifstream& operator>> (std::ifstream& fin, Pipe& pipe){
-    std::cout<<"Reading info about pipes"<<std::endl;
+ 
     if (!valueInput(fin, pipe.ID, ',')){
         fin.setstate(std::ios::failbit);
         return fin;
     }
-
+ 
     std::getline(fin, pipe.name, ',');
-
+ 
     if (!valueInput(fin, pipe.status, ',') || !valueInput(fin, pipe.length, ',') || !valueInput(fin, pipe.diameter, ',')){
         fin.setstate(std::ios::failbit);
     }
@@ -78,6 +80,10 @@ std::ifstream& operator>> (std::ifstream& fin, Pipe& pipe){
 
 bool checkParam(Pipe& pipe, int param) {
     return (pipe.GetStatus() == param);
+}
+
+bool checkParam(Pipe& pipe, double param) {
+    return (pipe.GetDiameter() == param);
 }
 
 void searchObjects(std::unordered_map<int, Pipe>& objects, std::unordered_set<int>& searchResultSet){
@@ -90,7 +96,7 @@ void searchObjects(std::unordered_map<int, Pipe>& objects, std::unordered_set<in
         std::cin.ignore(INT_MAX, '\n');
         std::getline(std::cin, nameToSearch);
         searchResultSet = findObjectByParam(objects, checkName, nameToSearch);
-
+ 
     } else if (searchChoice == 1) {
         std::cout << " Input status to search by (\"0\" for repairing pipes, \"1\" for working pipes): ";
         int param = GetRightValue(std::cin, 0, 1);

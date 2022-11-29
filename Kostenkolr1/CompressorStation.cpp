@@ -67,16 +67,11 @@ void CompressorStation::EditCompressorStation(){
     for (auto i: shops)
         std::cout << i << " ";
 
-    std::cout << "\nEnter new shops statuses (\"1\" if it's \"in work\", and \"0\" if it is not "
-              << "(REMINDER: if you pass amount of statuses that is more than you wrote step back, extra statuses won't be passed)): "<<std::endl;
+    std::cout << "\nEnter new shops statuses (\"1\" if it's \"in work\", and \"0\" if it is not ):"<<std::endl;
 
-    int shopsAmount = shops.size();
-    shops.clear(); 
-    shops.reserve(shopsAmount);
-    for (int i(0); i < shopsAmount; ++i){
-        int status = GetRightValue(std::cin, 0, 1); 
-        shops.push_back(status);
-    }
+    for (auto& status: shops)
+        status = GetRightValue(std::cin, 0, 1); 
+    
 }
 
 //  Saving compressor station to a file -----------------------------------------------------------
@@ -89,7 +84,7 @@ std::ofstream& operator<< (std::ofstream& fout, const CompressorStation& CS){
 
 //  Loading compressor station from a file --------------------------------------------------------
 std::ifstream& operator>> (std::ifstream& fin, CompressorStation& CS){
- 
+    
     if (!valueInput(fin, CS.ID, ',')){
         fin.setstate(std::ios::failbit);
         return fin;
@@ -103,6 +98,7 @@ std::ifstream& operator>> (std::ifstream& fin, CompressorStation& CS){
         return fin;
     }
 
+    CS.shops.reserve(shopsAmount);
     for (int i(0); i < shopsAmount; ++i){
         int status;
         if (!valueInput(fin, status, ',') || (status < 0) || (status > 1)){

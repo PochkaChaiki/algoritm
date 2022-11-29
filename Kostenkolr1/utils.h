@@ -5,18 +5,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <type_traits>
-
-
-
-// template <typename T>
-// class VarType {
-// public:
-//     T type;
-// };
-
-
-
-
+#include <vector>
+#include <list>
+#include <stack>
 
 // Function to input value to a variable and to check if it fits the requirements of variable's type.
 template <typename T>
@@ -60,9 +51,5 @@ std::unordered_set<int> findObjectByParam(std::unordered_map<int, T>& objects, f
     return result;
 }
 
-// template <typename T>
-// void getObjectsToEdit(std::unordered_map<int, T>, std::unordered_set<int> resultSet){
-    
-// }
 
 #endif

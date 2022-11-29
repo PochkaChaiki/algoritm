@@ -13,6 +13,10 @@ public:
 
     std::string name;
 
+    int startCSID;
+    int endCSID;
+    int topid;
+
     Pipe();
     ~Pipe() = default;
 
@@ -32,6 +36,8 @@ public:
 
     int GetStatus();
 
+    double GetDiameter();
+
     void SetStatus(int status);
     
     void EditPipe();   
@@ -40,9 +46,12 @@ private:
     int status;
     double length;
     double diameter; 
+
 };
 
-bool checkParam(Pipe& pipe, int param);
+bool checkParam(Pipe& pipe, int param); //for statuses
+
+bool checkParam(Pipe& pipe, double param); //for diameters
 
 void searchObjects(std::unordered_map<int, Pipe>& objects, std::unordered_set<int>& searchResultSet);
 
