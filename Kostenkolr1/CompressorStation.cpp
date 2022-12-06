@@ -6,7 +6,7 @@
 #include "CompressorStation.h"
 #include <vector>
 
-int CompressorStation::ID_counter = 0;
+int CompressorStation::ID_counter = 1;
 
 CompressorStation::CompressorStation(){
     ID = ID_counter++;
@@ -20,6 +20,8 @@ double CompressorStation::GetFreeShops()
 {
     return (double)(shops.size() - std::count(shops.begin(), shops.end(), 1)) / shops.size();
 }
+
+int CompressorStation::GetShopsAmount(){return shops.size();}
 
 //  User input compressor station  ----------------------------------------------------------------
 std::istream& operator>> (std::istream& in, CompressorStation& CS){
@@ -53,12 +55,11 @@ std::ostream& operator<< (std::ostream& out, const CompressorStation& CS){
     out << "\tCS's efficiency: " << CS.efficiency * 100 << "%" << std::endl;
     out << "\tCS's shops amount: " << CS.shops.size() << std::endl;
     out << "\tCS's working shops amount: " << std::count(CS.shops.begin(), CS.shops.end(), 1) << std::endl;
-    out << "\tCS's each shop's status: " << std::endl;
+    out << "\tCS's each shop's status:  ";
     
     for (auto i: CS.shops)
         out << i << " ";
 
-    out << std::endl <<"=...=...=...=...=...=...=...=...=...=...=...=...=...=...="<<std::endl;
     return out;
 }
 

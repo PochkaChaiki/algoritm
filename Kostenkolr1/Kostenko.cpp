@@ -16,9 +16,9 @@ int main(){
     while (option){
         std::cout << "#----------------------------------------------#" << std::endl;
         std::cout << "Choose menu's option:\n1.Add a compressor station;\n2.Connect compressor stations with pipe;\n3.Show all objects;\n4.Edit a pipe;"
-                  << "\n5.Edit a compressor station;\n6.Save gas company;\n7.Load gas company;\n8.Find specific objects;\n9.Unlink(don't work for now);\n10.Topological Sort;\n0.Close program" << std::endl;
+                  << "\n5.Edit a compressor station;\n6.Save gas company;\n7.Load gas company;\n8.Find specific objects;\n9.Topological Sort;\n0.Close program" << std::endl;
 
-        option = GetRightValue(std::cin, 0, 10);
+        option = GetRightValue(std::cin, 0, 9);
         
 // Checking option ------------------------------------------------------------------------------------------------------------------------
         if (option == 1){
@@ -57,9 +57,7 @@ int main(){
     // Finding by filters -------------------------------------------------------------------------------------------------------------------------------
             myCompany.findObjects();
         } else if (option == 9){
-            myCompany.unlink();
-        } else if (option == 10){
-            myCompany.Network.Sort();
+            myCompany.Sort();
         }
     }
     return 0;

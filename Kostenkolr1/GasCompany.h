@@ -17,9 +17,8 @@ public:
     std::unordered_map <int, Pipe> Pipeline;
     std::unordered_map <int, CompressorStation> StationsGroup;
 
-    Graph Network;
-    // std::vector<std::vector<int>> Matrix;
-
+    std::unordered_map<int, Graph::Edge> Connections;
+    //Graph Network;
     
     void showObjects();
     void saveCompany(std::string filename); 
@@ -29,7 +28,13 @@ public:
     void editPipes();
     void editCompressorStations();
     void findObjects();
-    void unlink();
+    
+    void Sort();
+
+    // SpecialUseFunctions
+private:
+    bool IsCSFree(int CSID);
+    int GetCSdegree(int CSID);
 };
 
 void chooseIdentifiers(std::unordered_set<int>& idSet);
@@ -71,8 +76,6 @@ void getObjectsToEdit(std::unordered_map<int, T>& objects, std::unordered_set<in
 
 void fillMatrix();
 
-
-
 // template <typename T>
 // void searchObjects(std::unordered_map<int, T>& objects, std::unordered_set<int>& searchResultSet){
 //     // param - is actually utilitary thing. It is used to assign data type to search pipes.
@@ -94,5 +97,6 @@ void fillMatrix();
 //         searchResultSet = findObjectByParam(objects, checkParam, param);
 //     }
 // }
+
 
 #endif

@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "Pipe.h"
 
-int Pipe::ID_counter = 0;
+int Pipe::ID_counter = 1;
 
 Pipe::Pipe(){
     ID = ID_counter++;
@@ -47,7 +47,6 @@ std::ostream& operator<< (std::ostream& out, const Pipe& pipe)
     out << "\tPipe's status: " << (pipe.status ? "In work" : "Repairing") << std::endl;
     out << "\tPipe's length: " << pipe.length << std::endl;
     out << "\tPipe's diameter: " << pipe.diameter << std::endl;
-    out << "=...=...=...=...=...=...=...=...=...=...=...=...=...=...=" << std::endl;
     return out;
 }
 

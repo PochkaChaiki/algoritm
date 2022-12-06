@@ -11,7 +11,6 @@
 class CompressorStation{
 public:
     static int ID_counter;
-    int topid;
     std::string name;
 
     CompressorStation();
@@ -35,11 +34,13 @@ public:
     
     double GetFreeShops(); 
 
+    int GetShopsAmount();
+
 private:
     int ID;
     double efficiency;
     std::vector<int> shops;
-    std::unordered_set<int> connectedPipes;
+    
 };
 
 bool checkParam(CompressorStation& CS, double param);

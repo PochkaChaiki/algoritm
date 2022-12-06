@@ -13,10 +13,6 @@ public:
 
     std::string name;
 
-    int startCSID;
-    int endCSID;
-    int topid;
-
     Pipe();
     ~Pipe() = default;
 

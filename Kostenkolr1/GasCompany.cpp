@@ -1,35 +1,57 @@
 #include "GasCompany.h"
 #include <iostream>
 
+bool GasCompany::IsCSFree(int CSID){
+    for (auto& node: Connections)
+        if ((node.second.ExitID == CSID) || (node.second.EnterID == CSID))
+            return false;
+
+    return true;
+}
+
+int GasCompany::GetCSdegree(int CSID){
+    int degree(0);
+    for (auto& node: Connections)
+        if ((node.second.EnterID == CSID) || (node.second.ExitID == CSID))
+            degree++;
+        
+    return degree;
+}
+
 void GasCompany::addCS(){
     CompressorStation CS;
     std::cin >> CS;
     StationsGroup.insert({CS.GetID(), CS});
     std::cout << "Id currently used compressor station: " << CS.GetID() << "\n\n";
-    Network.AdjecencyList[CS.GetID()];
+    
 }
 
 void GasCompany::addConnection(){
     Pipe pipe;
     Graph::Edge newEdge;
-    newEdge.edgeID = pipe.GetID();
+    newEdge.EdgeID = pipe.GetID();
 
     std::cout << "Enter start compressor station: ";
     newEdge.EnterID = GetRightValue(std::cin, 0, CompressorStation::ID_counter - 1);
-    while (StationsGroup.find(newEdge.EnterID) == StationsGroup.end()){
-        std::cout << "Input error: Invalid choice of compressor station. Try Again.\n";
+    while ((StationsGroup.find(newEdge.EnterID) == StationsGroup.end()) || (GetCSdegree(newEdge.EnterID) >= StationsGroup[newEdge.EnterID].GetShopsAmount())){
+        std::cout << "Input error: Invalid choice of compressor station. Type \"0\" to stop or Try Again.\n";
         newEdge.EnterID = GetRightValue(std::cin, 0, CompressorStation::ID_counter - 1);
+        if (newEdge.EnterID == 0){
+            return;
+        }
     }
     
     std::cout << "Enter end compressor station: ";
     newEdge.ExitID = GetRightValue(std::cin, 0, CompressorStation::ID_counter - 1);
-    while ((StationsGroup.find(newEdge.ExitID) == StationsGroup.end()) || (newEdge.ExitID == newEdge.EnterID)){
-        std::cout << "Input error: Invalid choice of compressor station. Try Again.\n";
+    while ((StationsGroup.find(newEdge.ExitID) == StationsGroup.end()) || (GetCSdegree(newEdge.ExitID) >= StationsGroup[newEdge.ExitID].GetShopsAmount()) || (newEdge.ExitID == newEdge.EnterID)){
+        std::cout << "Input error: Invalid choice of compressor station. Type \"0\" to stop or Try Again.\n";
         newEdge.ExitID = GetRightValue(std::cin, 0, CompressorStation::ID_counter - 1);
+        if (newEdge.ExitID == 0){
+            return;
+        }
     }
     
-    Network.AdjecencyList[newEdge.EnterID].push_back(newEdge);
-
+    Connections.insert({newEdge.EdgeID, newEdge});
     std::cin >> pipe;
     Pipeline.insert({pipe.GetID(), pipe});
     std::cout << "Id currently used pipe: " << pipe.GetID() << "\n\n";
@@ -52,8 +74,10 @@ void GasCompany::editPipes(){
             Pipeline[id].SetStatus(statusToSet);
         }
     else if (actionChoice == 1)
-        for (auto id: searchResultSet)
-            Pipeline.erase(Pipeline.find(id));
+        for (auto id: searchResultSet){
+            Connections.erase(Connections.find(id));
+            Pipeline.erase(Pipeline.find(id)); 
+        }
 }
 
 void GasCompany::editCompressorStations(){
@@ -73,12 +97,11 @@ void GasCompany::editCompressorStations(){
             StationsGroup[id].EditCompressorStation();
     }
     else if (actionChoice == 1)
-        for (auto id: searchResultSet){
-            if (Network.AdjecencyList[id].empty()){
-                std::cout<<"Deleting is denied. Unlink pipes from compressor station first.\n";
+        for (auto& id: searchResultSet){
+            if (!IsCSFree(id)){
+                std::cout << "Deleting is denied. Unlink pipes from compressor station first.\n";
                 continue;
             } else {
-                Network.AdjecencyList.erase(Network.AdjecencyList.find(id));
                 StationsGroup.erase(StationsGroup.find(id));
             }
         }
@@ -111,10 +134,17 @@ void GasCompany::showObjects(){
     std::cout<<"#--------------------------------------------------------#"<<std::endl;
     for (auto pipe : Pipeline){
         std::cout << pipe.second;
+        std::cout << "Pipe connects compressor stations: \n\t" << Connections[pipe.first].EnterID << " --> " << Connections[pipe.first].ExitID << std::endl;
+        std::cout << "\n=...=...=...=...=...=...=...=...=...=...=...=...=...=...=\n";
     }
     std::cout<<"#--------------------------------------------------------#"<<std::endl;
     for (auto station: StationsGroup){
         std::cout << station.second;
+        std::cout << "\n\tPlugged to cs pipes: ";
+        for (auto& link: Connections)
+            if ((link.second.EnterID == station.second.GetID()) || (link.second.ExitID == station.second.GetID()))
+                std::cout << link.first << " ";
+        std::cout << "\n=...=...=...=...=...=...=...=...=...=...=...=...=...=...=\n";
     }
 }
 
@@ -123,7 +153,7 @@ void GasCompany::saveCompany(std::string filename){
     if (fout){
         fout << "Pipes: " << Pipeline.size() << ",";
         for (auto pipe: Pipeline)
-            fout << pipe.second;
+            fout << pipe.second << Connections[pipe.first].EnterID << "," << Connections[pipe.first].ExitID << ",";
 
         fout << "Stations: " << StationsGroup.size() << ",";
         for (auto station: StationsGroup)
@@ -150,12 +180,17 @@ void GasCompany::loadCompany(std::string filename){
             if (input == "Pipes:"){
                 for (int i(0); i<amount; ++i){
                     Pipe pipe;
+                    Graph::Edge e;
                     fin >> pipe;
+                    fin >> e;
+                    e.EdgeID = pipe.GetID();
                     if (fin.fail()){
                         std::cout<<"FILE READ ERROR: Failed to read pipe's parameters due to file's damage."<<std::endl;
                         continue;
-                    } else
+                    } else {
+                        Connections.insert({e.EdgeID, e});
                         Pipeline.insert({pipe.GetID(), pipe});
+                    }
                     Pipe::ID_counter = ((Pipe::ID_counter < pipe.GetID())? pipe.GetID() : Pipe::ID_counter);
                 }
             } else if (input == "Stations:"){
@@ -200,6 +235,23 @@ void chooseIdentifiers(std::unordered_set<int>& idSet){
     idSet = userIdentifiers;
 }
 
-void GasCompany::unlink(){
+// void GasCompany::disconnect(){
+//     int EdgeID;
 
+//     std::cout << "Input pipe's id: \n";
+//     EdgeID = GetRightValue(std::cin, 0, Pipe::ID_counter - 1);
+//     while (Pipeline.find(EdgeID) == Pipeline.end()){
+//         std::cout << "Input error: Invalid choice of pipe. Try Again.\n";
+//         EdgeID = GetRightValue(std::cin, 0, Pipe::ID_counter - 1);
+//     }
+
+//     Connections.erase(Connections.find(EdgeID));
+//     Pipeline.erase(Pipeline.find(EdgeID));
+// }
+
+void GasCompany::Sort(){
+    std::cout << "Topological sort of graph: " << std::endl;
+    Graph Network;
+    Network.FillAdjecencyList(Connections);
+    Network.Sort();
 }
