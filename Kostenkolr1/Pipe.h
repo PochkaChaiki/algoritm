@@ -33,10 +33,14 @@ public:
     int GetStatus();
 
     double GetDiameter();
+    
+    double GetLength();
 
     void SetStatus(int status);
     
     void EditPipe();   
+
+    
 private:
     int ID;
     int status;

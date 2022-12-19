@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <unordered_map>
-#include <unordered_set>
 #include <stack>
 #include <list>
 
@@ -28,7 +27,13 @@ public:
     bool CheckIsVerticeFree(int vertice);
     void Disconnect(int EdgeID);
     void FillAdjecencyList(std::unordered_map<int, Graph::Edge>& connections);
+    
 };
 
+std::vector<double> Dijkstra(std::vector<std::vector<double>> graph, int src);
+
+int min_dist_node(std::unordered_set<int>& spt_set, std::vector<double>& dist);
+
+double FordFulkerson(std::vector<std::vector<double>> &graph, int s, int t);
 
 #endif

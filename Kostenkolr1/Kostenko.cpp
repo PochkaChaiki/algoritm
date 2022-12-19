@@ -16,9 +16,10 @@ int main(){
     while (option){
         std::cout << "#----------------------------------------------#" << std::endl;
         std::cout << "Choose menu's option:\n1.Add a compressor station;\n2.Connect compressor stations with pipe;\n3.Show all objects;\n4.Edit a pipe;"
-                  << "\n5.Edit a compressor station;\n6.Save gas company;\n7.Load gas company;\n8.Find specific objects;\n9.Topological Sort;\n0.Close program" << std::endl;
+                  << "\n5.Edit a compressor station;\n6.Save gas company;\n7.Load gas company;\n8.Find specific objects;\n9.Topological Sort;" 
+                  << "\n10.Get shortest path;\n11.Get max flow;\n0.Close program" << std::endl;
 
-        option = GetRightValue(std::cin, 0, 9);
+        option = GetRightValue(std::cin, 0, 11);
         
 // Checking option ------------------------------------------------------------------------------------------------------------------------
         if (option == 1){
@@ -35,7 +36,7 @@ int main(){
 
         } else if (option == 4){
     // Editing pipes -----------------------------------------------------------------------------------------------------------------------
-            myCompany.editPipes();
+            myCompany.editPipeline();
         } else if (option == 5){
     // Editing compressor stations ------------------------------------------------------------------------------------------------------------------
             myCompany.editCompressorStations();
@@ -57,7 +58,12 @@ int main(){
     // Finding by filters -------------------------------------------------------------------------------------------------------------------------------
             myCompany.findObjects();
         } else if (option == 9){
+    // Topological sort of the network ------------------------------------------------------------------------------------------------------------------
             myCompany.Sort();
+        } else if (option == 10){
+            myCompany.ShortestPath();
+        } else if (option == 11){
+            myCompany.GetMaxFlow();
         }
     }
     return 0;

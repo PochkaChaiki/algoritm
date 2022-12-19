@@ -25,11 +25,13 @@ public:
     void loadCompany(std::string filename);
     void addCS();
     void addConnection();
-    void editPipes();
+    void editPipeline();
     void editCompressorStations();
     void findObjects();
     
     void Sort();
+    void ShortestPath();
+    void GetMaxFlow();
 
     // SpecialUseFunctions
 private:

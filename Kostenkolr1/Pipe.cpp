@@ -23,6 +23,7 @@ void Pipe::SetStatus(int status){this->status = status;}
 
 double Pipe::GetDiameter(){return diameter;}
 
+double Pipe::GetLength(){return length;}
 //  User input pipe -------------------------------------------------------------------------------
 std::istream& operator>> (std::istream& in, Pipe& pipe){
     in.ignore(INT_MAX, '\n');
